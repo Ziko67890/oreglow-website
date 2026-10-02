@@ -536,7 +536,25 @@
     .footer__top { grid-template-columns: 1fr 1fr 1fr; }
     .footer__brand { grid-column: 1 / -1; }
   }
-  @media (max-width: 900px) {
+  @media (max-width: 768px) {
+    /* Phones/tablets: no video, static dark gold gradient instead */
+    .bg-video, .ambient, .video-fallback .ambient { display: none; }
+    .hero {
+      background:
+        radial-gradient(120% 60% at 100% 0%, rgba(226,192,138,.85) 0%, rgba(184,146,90,.45) 30%, transparent 62%),
+        radial-gradient(100% 50% at 0% 100%, rgba(184,146,90,.75) 0%, rgba(154,118,66,.3) 35%, transparent 65%),
+        radial-gradient(70% 40% at 50% 70%, rgba(212,180,131,.35) 0%, transparent 70%),
+        linear-gradient(160deg, #6b4a1e 0%, #3a2810 35%, #1A1208 68%, #120c05 100%);
+    }
+    .hero__veil { background: linear-gradient(180deg, rgba(26,18,8,.35) 0%, rgba(26,18,8,.15) 45%, rgba(26,18,8,.3) 100%); }
+    .story {
+      background:
+        radial-gradient(100% 50% at 50% 0%, rgba(226,192,138,.6) 0%, rgba(184,146,90,.25) 35%, transparent 68%),
+        radial-gradient(80% 45% at 100% 100%, rgba(184,146,90,.6) 0%, transparent 65%),
+        radial-gradient(70% 40% at 0% 85%, rgba(154,118,66,.4) 0%, transparent 65%),
+        linear-gradient(180deg, #4a3315 0%, #1A1208 55%, #120c05 100%);
+    }
+    .story__veil { background: none; }
     .products { --cols: 2; }
     .nav__toggle { display: block; z-index: 2; }
     .logo { position: relative; z-index: 2; }
@@ -565,18 +583,19 @@
   @media (hover: none) {
     .product__add { transform: none; opacity: 1; }
   }
-  @media (max-width: 640px) {
-    :root { --gutter: 16px; }
+  @media (max-width: 480px) {
+    :root { --gutter: 20px; }
     .nav { padding: 18px var(--gutter); }
     .logo { font-size: 24px; }
     .logo small { display: none; }
 
-    .hero h1 { font-size: clamp(40px, 11.5vw, 52px); margin: 0 0 20px; }
+    .hero h1 { font-size: clamp(34px, 10.5vw, 42px); margin: 0 0 20px; }
     .hero p { font-size: 15px; margin-bottom: 32px; }
     .hero__actions { flex-direction: column; align-items: stretch; gap: 14px; }
-    .hero__actions .btn { justify-content: center; padding: 17px 24px; }
+    .hero__actions .btn { width: 100%; justify-content: center; padding: 17px 24px; }
     .hero__link { text-align: center; align-self: center; padding: 12px 0 4px; }
-    .hero__visual { max-width: 270px; }
+    .hero__visual { max-width: 240px; }
+    .hero__product { width: 82%; }
     .hero__inner { gap: 44px; padding-top: 112px; }
 
     .pillars__grid { grid-template-columns: 1fr 1fr; transform: translateY(-36px); }
@@ -616,22 +635,26 @@
     .stat__label { font-size: 9px; letter-spacing: .22em; }
 
     .footer { padding-top: 64px; }
-    .footer__top { grid-template-columns: 1fr; gap: 36px; padding-bottom: 40px; }
+    .footer__top { grid-template-columns: 1fr; gap: 36px; padding-bottom: 40px; text-align: center; }
+    .footer .logo { justify-content: center; }
+    .footer ul { justify-items: center; }
+    .newsletter { margin: 0 auto; }
     .footer h4 { margin-bottom: 8px; }
     .footer ul { gap: 0; }
-    .footer ul a { display: block; padding: 10px 0; font-size: 15px; }
+    .footer ul a { display: block; padding: 10px 16px; font-size: 15px; }
+    .footer ul a:hover { padding-left: 16px; }
     .newsletter { max-width: none; }
     .newsletter input { font-size: 16px; }
     .newsletter button { min-height: 44px; padding-left: 12px; }
-    .footer__bottom { flex-direction: column; gap: 8px; padding-bottom: 72px; }
+    .footer__bottom { flex-direction: column; align-items: center; text-align: center; gap: 8px; padding-bottom: 72px; }
     .footer__bottom a { display: inline-block; padding: 8px 0; }
 
     .chat-btn { right: 16px; bottom: 16px; width: 58px; height: 58px; }
     .chat-btn.active { opacity: 0; pointer-events: none; }
     .chat {
-      left: 0; right: 0; bottom: 0; width: 100%;
-      height: 88vh; height: 88dvh; max-height: none;
-      border: none; border-radius: 18px 18px 0 0;
+      left: 10px; right: 10px; bottom: 10px; width: auto;
+      height: calc(100vh - 90px); height: calc(100dvh - 90px); max-height: 680px;
+      border-radius: 18px;
     }
     .chat__head { padding: 18px 16px; }
     .chat__close { padding: 12px; margin-right: -8px; }
@@ -640,7 +663,7 @@
     .msg { max-width: 88%; font-size: 14.5px; }
     .chat__chips { padding: 0 16px 12px; }
     .chip { padding: 10px 14px; font-size: 12px; }
-    .chat__form { padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
+    .chat__form { padding: 10px 12px; }
     .chat__form input { font-size: 16px; min-height: 48px; padding: 8px 6px; }
     .chat__send { width: 48px; height: 48px; }
   }
@@ -672,8 +695,8 @@
 
 <!-- ============ HERO ============ -->
 <header class="hero" id="top">
-  <video class="bg-video" autoplay muted loop playsinline preload="auto">
-    <source src="assets/videos/hero_vieo.mp4" type="video/mp4">
+  <video class="bg-video" autoplay muted loop playsinline preload="none">
+    <source data-src="assets/videos/hero_vieo.mp4" type="video/mp4">
   </video>
   <div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
   <div class="hero__veil"></div>
@@ -749,8 +772,8 @@
 
 <!-- ============ BRAND STORY ============ -->
 <section class="story" id="about">
-  <video class="bg-video" autoplay muted loop playsinline preload="metadata">
-    <source src="assets/videos/brand_video.mp4" type="video/mp4">
+  <video class="bg-video" autoplay muted loop playsinline preload="none">
+    <source data-src="assets/videos/brand_video.mp4" type="video/mp4">
   </video>
   <div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
   <div class="story__veil"></div>
@@ -939,16 +962,29 @@
     else img.addEventListener('error', function () { applyFallback(img); }, { once: true });
   });
 
-  /* ---------- Video fallbacks: swap in an ambient gold background ---------- */
-  document.querySelectorAll('.bg-video').forEach(function (video) {
-    var section = video.parentElement;
-    function fail() { section.classList.add('video-fallback'); }
-    var sources = video.querySelectorAll('source');
-    var last = sources[sources.length - 1];
-    if (last) last.addEventListener('error', fail);
-    video.addEventListener('error', fail);
-    if (video.networkState === 3) fail(); // NETWORK_NO_SOURCE
-  });
+  /* ---------- Background videos: desktop only ----------
+     Phones get a static gradient (see the 768px media query), so the video
+     files are only attached and downloaded on screens wider than 768px. */
+  var desktopMQ = window.matchMedia('(min-width: 769px)');
+  function loadVideos() {
+    if (!desktopMQ.matches) return;
+    document.querySelectorAll('.bg-video').forEach(function (video) {
+      if (video.dataset.loaded) return;
+      video.dataset.loaded = '1';
+      var section = video.parentElement;
+      video.querySelectorAll('source[data-src]').forEach(function (src) {
+        src.addEventListener('error', function () { section.classList.add('video-fallback'); });
+        src.src = src.getAttribute('data-src');
+      });
+      video.addEventListener('error', function () { section.classList.add('video-fallback'); });
+      video.load();
+      var play = video.play();
+      if (play && play.catch) play.catch(function () {});
+    });
+  }
+  loadVideos();
+  if (desktopMQ.addEventListener) desktopMQ.addEventListener('change', loadVideos);
+  else if (desktopMQ.addListener) desktopMQ.addListener(loadVideos);
 
   /* ---------- Cart ---------- */
   var cartCount = 0;
