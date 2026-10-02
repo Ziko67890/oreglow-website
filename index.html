@@ -144,7 +144,13 @@
     background: radial-gradient(ellipse at 70% 40%, #4a3519 0%, #24190b 50%, var(--dark) 100%);
   }
   .bg-video {
-    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
   }
   .hero__veil {
     position: absolute; inset: 0; z-index: 1;
@@ -537,24 +543,6 @@
     .footer__brand { grid-column: 1 / -1; }
   }
   @media (max-width: 768px) {
-    /* Phones/tablets: no video, static dark gold gradient instead */
-    .bg-video, .ambient, .video-fallback .ambient { display: none; }
-    .hero {
-      background:
-        radial-gradient(120% 60% at 100% 0%, rgba(226,192,138,.85) 0%, rgba(184,146,90,.45) 30%, transparent 62%),
-        radial-gradient(100% 50% at 0% 100%, rgba(184,146,90,.75) 0%, rgba(154,118,66,.3) 35%, transparent 65%),
-        radial-gradient(70% 40% at 50% 70%, rgba(212,180,131,.35) 0%, transparent 70%),
-        linear-gradient(160deg, #6b4a1e 0%, #3a2810 35%, #1A1208 68%, #120c05 100%);
-    }
-    .hero__veil { background: linear-gradient(180deg, rgba(26,18,8,.35) 0%, rgba(26,18,8,.15) 45%, rgba(26,18,8,.3) 100%); }
-    .story {
-      background:
-        radial-gradient(100% 50% at 50% 0%, rgba(226,192,138,.6) 0%, rgba(184,146,90,.25) 35%, transparent 68%),
-        radial-gradient(80% 45% at 100% 100%, rgba(184,146,90,.6) 0%, transparent 65%),
-        radial-gradient(70% 40% at 0% 85%, rgba(154,118,66,.4) 0%, transparent 65%),
-        linear-gradient(180deg, #4a3315 0%, #1A1208 55%, #120c05 100%);
-    }
-    .story__veil { background: none; }
     .products { --cols: 2; }
     .nav__toggle { display: block; z-index: 2; }
     .logo { position: relative; z-index: 2; }
@@ -695,8 +683,8 @@
 
 <!-- ============ HERO ============ -->
 <header class="hero" id="top">
-  <video class="bg-video" autoplay muted loop playsinline preload="none">
-    <source data-src="assets/videos/hero_vieo.mp4" type="video/mp4">
+  <video class="bg-video" autoplay muted loop playsinline webkit-playsinline preload="auto">
+    <source src="assets/videos/hero_vieo.mp4" type="video/mp4">
   </video>
   <div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
   <div class="hero__veil"></div>
@@ -772,8 +760,8 @@
 
 <!-- ============ BRAND STORY ============ -->
 <section class="story" id="about">
-  <video class="bg-video" autoplay muted loop playsinline preload="none">
-    <source data-src="assets/videos/brand_video.mp4" type="video/mp4">
+  <video class="bg-video" autoplay muted loop playsinline webkit-playsinline preload="auto">
+    <source src="assets/videos/brand_video.mp4" type="video/mp4">
   </video>
   <div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
   <div class="story__veil"></div>
@@ -962,29 +950,37 @@
     else img.addEventListener('error', function () { applyFallback(img); }, { once: true });
   });
 
-  /* ---------- Background videos: desktop only ----------
-     Phones get a static gradient (see the 768px media query), so the video
-     files are only attached and downloaded on screens wider than 768px. */
-  var desktopMQ = window.matchMedia('(min-width: 769px)');
-  function loadVideos() {
-    if (!desktopMQ.matches) return;
-    document.querySelectorAll('.bg-video').forEach(function (video) {
-      if (video.dataset.loaded) return;
-      video.dataset.loaded = '1';
-      var section = video.parentElement;
-      video.querySelectorAll('source[data-src]').forEach(function (src) {
-        src.addEventListener('error', function () { section.classList.add('video-fallback'); });
-        src.src = src.getAttribute('data-src');
-      });
-      video.addEventListener('error', function () { section.classList.add('video-fallback'); });
-      video.load();
-      var play = video.play();
-      if (play && play.catch) play.catch(function () {});
+  /* ---------- Background videos (all devices) ----------
+     Force muted + inline playback for iOS, retry play() once the video can
+     play and on the first touch (some phones block autoplay until then), and
+     only fall back to the ambient gold background if the file fails to load. */
+  var bgVideos = document.querySelectorAll('.bg-video');
+  function playAll() {
+    bgVideos.forEach(function (video) {
+      var p = video.play();
+      if (p && p.catch) p.catch(function () {});
     });
   }
-  loadVideos();
-  if (desktopMQ.addEventListener) desktopMQ.addEventListener('change', loadVideos);
-  else if (desktopMQ.addListener) desktopMQ.addListener(loadVideos);
+  bgVideos.forEach(function (video) {
+    var section = video.parentElement;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    function fail() { section.classList.add('video-fallback'); }
+    video.querySelectorAll('source').forEach(function (src) { src.addEventListener('error', fail); });
+    video.addEventListener('error', fail);
+    video.addEventListener('canplay', function () { var p = video.play(); if (p && p.catch) p.catch(function () {}); });
+  });
+  playAll();
+  ['touchstart', 'click', 'scroll'].forEach(function (evt) {
+    window.addEventListener(evt, function once() {
+      playAll();
+      window.removeEventListener(evt, once);
+    }, { passive: true });
+  });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) playAll(); });
 
   /* ---------- Cart ---------- */
   var cartCount = 0;
